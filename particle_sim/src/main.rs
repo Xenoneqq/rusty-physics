@@ -14,18 +14,31 @@ struct Particle {
 
 impl Particle {
     fn update(&mut self, dt: f32) {
+
+        // ELIMINATING UNWANTED BEHAVIOUR
+        if dt < 0.0 {
+            return;
+        }
+
         // DECREASING TIME
         self.lifetime -= dt;
 
         // GRAVITY
-        self.vel.y += GRAVITY * dt;
+        if self.pos.y < screen_height() - 5.0 {
+            self.vel.y += GRAVITY * dt;
+        }
         self.pos += self.vel * dt;
 
         // DETECTING IMPACT WITH GROUND
         if self.pos.y + PARTICLE_RADIUS > screen_height() {
             // BOUNCES
             self.pos.y = screen_height() - PARTICLE_RADIUS;
-            self.vel.y = -self.vel.y * BOUNCE_DAMPING;
+            if self.vel.y.abs() > 10.0 {
+                self.vel.y = -self.vel.y * BOUNCE_DAMPING;
+            }
+            else {
+                self.vel.y = 0.0;
+            }
 
             // GROUND DRAG
             let drag = DRAG_FORCE * dt;
@@ -88,7 +101,9 @@ async fn main() {
 
         draw_text("Left Click to EXPLODE PARTICLES!", 20.0, 20.0, 20.0, WHITE);
         let count_text = format!("Particles : {}", particles.len());
+        let fps_text = format!("FPS : {}", get_fps());
         draw_text(&count_text, 20.0, 40.0, 20.0, WHITE);
+        draw_text(&fps_text, 20.0, 60.0, 20.0, WHITE);
         next_frame().await;
     }
 }

@@ -17,11 +17,23 @@ struct Particle {
 
 impl Particle {
     fn update(&mut self, dt: f32) {
+        
+        // ELIMINATING UNWANTED BEHAVIOUR
+        if dt < 0.0 {
+            return;
+        }
+        
         // DECREASING TIME
         self.lifetime -= dt;
 
         // GRAVITY
-        self.vertical_vel -= GRAVITY * dt;
+        if self.verticel_pos > 1.0 {
+            self.vertical_vel -= GRAVITY * dt;
+        }
+        else if self.vertical_vel.abs() < 10.0 {
+            self.vertical_vel = 0.0;
+            self.verticel_pos = 0.0;
+        }
         self.verticel_pos += self.vertical_vel * dt;
         self.pos += self.vel * dt;
 
