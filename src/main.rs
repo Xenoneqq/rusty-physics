@@ -153,6 +153,8 @@ async fn main() {
         draw_text("Left Click to EXPLODE PARTICLES!", 20.0, 20.0, 20.0, WHITE);
         let count_text = format!("Particles : {}", particles.len());
         draw_text(&count_text, 20.0, 40.0, 20.0, WHITE);
+        let fps_text = format!("FPS: {:.1}", 1.0 / dt);
+        draw_text(&fps_text, 20.0, 60.0, 20.0, WHITE);
         next_frame().await;
     }
 }
