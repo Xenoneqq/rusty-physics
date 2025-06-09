@@ -12,7 +12,10 @@ struct Particle {
     vel: Vec2,
     verticel_pos: f32,
     vertical_vel: f32,
-    lifetime: f32
+    lifetime: f32,
+
+    ball_color: Color,
+    shadow_color: Color
 }
 
 impl Particle {
@@ -67,12 +70,14 @@ impl Particle {
         }
     }
 
-    fn draw(&self) {
-        draw_circle(self.pos.x, self.pos.y - self.verticel_pos, PARTICLE_RADIUS, YELLOW);
+    fn draw(&mut self) {
+        self.ball_color.a = (self.lifetime / 5.0).min(1.0);
+        draw_circle(self.pos.x, self.pos.y - self.verticel_pos, PARTICLE_RADIUS, self.ball_color);
     }
 
-    fn draw_shadow(&self) {
-        draw_circle(self.pos.x, self.pos.y + SHADOW_OFFSET, PARTICLE_RADIUS, GRAY);
+    fn draw_shadow(&mut self) {
+        self.shadow_color.a = (self.lifetime / 5.0).min(1.0);
+        draw_circle(self.pos.x, self.pos.y + SHADOW_OFFSET, PARTICLE_RADIUS * (1.0 - (self.verticel_pos / 300.0).min(1.0)), self.shadow_color);
     }
 
     fn alive(&self) -> bool {
@@ -90,9 +95,23 @@ fn window_conf() -> Conf {
     }
 }
 
+fn calculate_correct_frametime(vec: &mut Vec<f32>, dt: f32) -> f32 {
+    vec.push(dt);
+
+    while vec.len() > 11 {
+        vec.remove(0);
+    }
+
+    let mut sorted = vec.clone();
+    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    sorted[vec.len() / 2]
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
     let mut particles: Vec<Particle> = vec![];
+    let mut frametimes: Vec<f32> = Vec::new();
 
     loop {
         clear_background(BLACK);
@@ -112,11 +131,13 @@ async fn main() {
                     verticel_pos: 0.01,
                     vertical_vel: start_vertical_velocity,
                     lifetime: life,
+                    ball_color: Color::new(0.376, 0.168, 1.0, 1.0),
+                    shadow_color: Color::new(0.184, 0.109, 0.321, 1.0),
                 });
             }
         }
 
-        let dt = get_frame_time();
+        let dt = calculate_correct_frametime(&mut frametimes, get_frame_time());
 
         for p in particles.iter_mut() {
             p.update(dt);
