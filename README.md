@@ -15,6 +15,12 @@ Rusty Physics is a lightweight and fun simulation project written in Rust using 
 
 ---
 
+## Possible Additions
+
+- **Optimization Improvements** – Handling particles in batches and utilizing multithreading for better performance.
+
+---
+
 ## Setup `Linux / WSL2`
 
 1. **Install Rust and Cargo**
@@ -35,8 +41,8 @@ Rusty Physics is a lightweight and fun simulation project written in Rust using 
 3. **Build and Run the Project**
 
     ```sh
-    cargo build --release
-    cargo run --release
+    cargo build
+    cargo run
     ```
 
     The simulation window should open, allowing you to interact with the physics demo in real time.

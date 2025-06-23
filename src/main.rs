@@ -28,6 +28,10 @@ impl Particle {
         
         // DECREASING TIME
         self.lifetime -= dt;
+        
+        if !self.is_moving(){
+            return;
+        }
 
         // GRAVITY
         if self.verticel_pos > 1.0 {
@@ -52,19 +56,21 @@ impl Particle {
                 self.vertical_vel = 0.0;
             }
 
-            // GROUND DRAG
+            // GROUND DRAG Y
             let drag = DRAG_FORCE * dt;
-            for v in [&mut self.vel.x, &mut self.vel.y] {
-                if *v != 0.0 {
-                    let sign = v.signum();
-                    let new_v = *v - sign * drag;
+            if self.vel.x != 0.0 {
+                let sign = self.vel.x.signum();
+                let new_v = self.vel.x - sign * drag;
 
-                    if new_v.signum() != sign {
-                        *v = 0.0;
-                    } else {
-                        *v = new_v;
-                    }
-                }
+                self.vel.x = if new_v.signum() != sign { 0.0 } else { new_v };
+            }
+
+            // GROUND DRAG X
+            if self.vel.y != 0.0 {
+                let sign = self.vel.y.signum();
+                let new_v = self.vel.y - sign * drag;
+
+                self.vel.y = if new_v.signum() != sign { 0.0 } else { new_v };
             }
 
         }
@@ -82,6 +88,10 @@ impl Particle {
 
     fn alive(&self) -> bool {
         return self.lifetime > 0.0;
+    }
+
+    fn is_moving(&self) -> bool {
+        self.vel.x != 0.0 || self.vel.y != 0.0 || self.vertical_vel != 0.0 || self.verticel_pos != 0.0
     }
 }
 
@@ -104,8 +114,10 @@ fn calculate_correct_frametime(vec: &mut Vec<f32>, dt: f32) -> f32 {
 
     let mut sorted = vec.clone();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-    sorted[vec.len() / 2]
+    if dt > sorted[vec.len() / 2] * 2.0 {
+        return sorted[vec.len() / 2];
+    }
+    dt
 }
 
 #[macroquad::main(window_conf)]
